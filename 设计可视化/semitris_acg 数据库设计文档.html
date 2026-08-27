@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>semitris_acg 数据库设计文档</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  /* ===== CSS Variables ===== */
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --bg-code: #0d1117;
+    --border: #30363d;
+    --border-light: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --accent-blue: #58a6ff;
+    --accent-green: #7ee787;
+    --accent-purple: #d2a8ff;
+    --accent-orange: #ffa657;
+    --accent-red: #ff7b72;
+    --accent-yellow: #e3b341;
+    --accent-cyan: #39d0d0;
+    --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ===== Navigation ===== */
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(13, 17, 23, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .nav-brand .db-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-links {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+  }
+
+  /* ===== Hero ===== */
+  .hero {
+    padding: 120px 24px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(88, 166, 255, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent-green);
+    margin-bottom: 24px;
+  }
+  .hero-badge .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 .highlight {
+    color: var(--accent-blue);
+    font-family: var(--font-mono);
+  }
+  .hero-desc {
+    font-size: 17px;
+    color: var(--text-secondary);
+    max-width: 680px;
+    margin-bottom: 32px;
+    line-height: 1.8;
+  }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .hero-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hero-meta .label { color: var(--text-muted); }
+  .hero-meta .value { color: var(--accent-blue); }
+
+  /* ===== Section Common ===== */
+  .section {
+    padding: 64px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-header {
+    margin-bottom: 40px;
+  }
+  .section-number {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent-blue);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+  .section-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 15px;
+    max-width: 640px;
+  }
+
+  /* ===== Stats Grid ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.2s;
+  }
+  .stat-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+  }
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 18px;
+  }
+  .stat-icon.blue { background: rgba(88, 166, 255, 0.12); color: var(--accent-blue); }
+  .stat-icon.green { background: rgba(126, 231, 135, 0.12); color: var(--accent-green); }
+  .stat-icon.purple { background: rgba(210, 168, 255, 0.12); color: var(--accent-purple); }
+  .stat-icon.orange { background: rgba(255, 166, 87, 0.12); color: var(--accent-orange); }
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* ===== ER Diagram ===== */
+  .er-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    overflow-x: auto;
+  }
+  .er-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 800px;
+    position: relative;
+  }
+  .er-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    width: 100%;
+  }
+  .er-table {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-width: 220px;
+    overflow: hidden;
+    position: relative;
+  }
+  .er-table.central {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 20px rgba(88, 166, 255, 0.15);
+  }
+  .er-table-header {
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .er-table.central .er-table-header {
+    background: rgba(88, 166, 255, 0.1);
+    color: var(--accent-blue);
+  }
+  .er-table-body {
+    padding: 8px 0;
+  }
+  .er-field {
+    padding: 4px 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .er-field .pk { color: var(--accent-orange); }
+  .er-field .fk { color: var(--accent-purple); }
+  .er-field .field-name { color: var(--text-primary); }
+  .er-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 40px;
+    position: relative;
+  }
+  .er-connector .line {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+  }
+  .er-connector .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+  }
+  .er-legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .er-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+  }
+  .er-legend-item .icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+
+  /* ===== Table Detail Cards ===== */
+  .tables-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .table-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .table-card-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .table-card-title .table-name {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-blue);
+  }
+  .table-card-title .table-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .table-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .table-badge {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .table-badge.engine { background: rgba(88, 166, 255, 0.12); color: var(--accent-blue); }
+  .table-badge.charset { background: rgba(126, 231, 135, 0.12); color: var(--accent-green); }
+
+  .table-fields {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-fields th {
+    text-align: left;
+    padding: 10px 24px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+  }
+  .table-fields td {
+    padding: 10px 24px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: top;
+  }
+  .table-fields tr:last-child td { border-bottom: none; }
+  .table-fields tr:hover td { background: rgba(88, 166, 255, 0.03); }
+  .field-name-cell {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-type-cell {
+    font-family: var(--font-mono);
+    color: var(--accent-purple);
+    font-size: 12px;
+  }
+  .field-null-cell {
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .field-null-cell.not-null { color: var(--accent-red); }
+  .field-null-cell.nullable { color: var(--text-muted); }
+  .field-default-cell {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent-orange);
+  }
+  .field-comment-cell {
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  .key-tag {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+  }
+  .key-tag.pk { background: rgba(255, 166, 87, 0.15); color: var(--accent-orange); }
+  .key-tag.fk { background: rgba(210, 168, 255, 0.15); color: var(--accent-purple); }
+  .key-tag.uk { background: rgba(57, 208, 208, 0.15); color: var(--accent-cyan); }
+
+  /* ===== Code Block ===== */
+  .code-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .code-header {
+    padding: 12px 20px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .code-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .code-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .code-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .code-dot.red { background: #ff5f56; }
+  .code-dot.yellow { background: #ffbd2e; }
+  .code-dot.green { background: #27c93f; }
+  .code-filename {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .copy-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .copy-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-blue);
+    background: rgba(88, 166, 255, 0.1);
+  }
+  .copy-btn.copied {
+    color: var(--accent-green);
+    border-color: var(--accent-green);
+  }
+  .code-body {
+    overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+  .code-body pre {
+    margin: 0;
+    padding: 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    white-space: pre;
+  }
+  /* SQL Syntax Highlighting */
+  .tok-keyword { color: var(--accent-purple); font-weight: 500; }
+  .tok-type { color: var(--accent-blue); }
+  .tok-string { color: var(--accent-green); }
+  .tok-number { color: var(--accent-orange); }
+  .tok-comment { color: var(--text-muted); font-style: italic; }
+  .tok-function { color: var(--accent-cyan); }
+  .tok-identifier { color: var(--text-primary); }
+  .tok-punctuation { color: var(--text-secondary); }
+
+  /* ===== Optimization Section ===== */
+  .opt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 16px;
+  }
+  .opt-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    border-left: 3px solid var(--accent-blue);
+  }
+  .opt-card.fix { border-left-color: var(--accent-red); }
+  .opt-card.improve { border-left-color: var(--accent-orange); }
+  .opt-card.feature { border-left-color: var(--accent-green); }
+  .opt-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .opt-tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .opt-tag.fix { background: rgba(255, 123, 114, 0.15); color: var(--accent-red); }
+  .opt-tag.improve { background: rgba(255, 166, 87, 0.15); color: var(--accent-orange); }
+  .opt-tag.feature { background: rgba(126, 231, 135, 0.15); color: var(--accent-green); }
+  .opt-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .opt-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .opt-desc code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent-blue);
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    padding: 48px 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  .footer-mono {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+  }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .hero { padding: 100px 20px 60px; }
+    .section { padding: 48px 20px; }
+    .er-container { padding: 20px; }
+    .table-fields th, .table-fields td { padding: 8px 12px; }
+    .table-fields th:nth-child(4),
+    .table-fields td:nth-child(4),
+    .table-fields th:nth-child(5),
+    .table-fields td:nth-child(5) { display: none; }
+    .opt-grid { grid-template-columns: 1fr; }
+    .code-body pre { font-size: 12px; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Navigation ===== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <svg class="db-icon" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2">
+        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+      </svg>
+      semitris_acg
+    </div>
+    <ul class="nav-links">
+      <li><a href="#overview">概览</a></li>
+      <li><a href="#er-diagram">ER 图</a></li>
+      <li><a href="#tables">表结构</a></li>
+      <li><a href="#ddl">DDL</a></li>
+      <li><a href="#optimization">优化说明</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    MySQL 8.0 / InnoDB / utf8mb4
+  </div>
+  <h1>ACG 追番收藏站点<br><span class="highlight">数据库设计文档</span></h1>
+  <p class="hero-desc">
+    面向单人 ACG 追番收藏场景的关系型数据库设计，涵盖用户、番剧资料、收藏追番、评价打分、推荐分享五大核心模块。
+    预留多用户扩展能力，修复原设计中的精度缺陷与级联约束问题。
+  </p>
+  <div class="hero-meta">
+    <span><span class="label">数据库：</span><span class="value">semitris_acg</span></span>
+    <span><span class="label">表数量：</span><span class="value">5</span></span>
+    <span><span class="label">字符集：</span><span class="value">utf8mb4</span></span>
+    <span><span class="label">引擎：</span><span class="value">InnoDB</span></span>
+  </div>
+</section>
+
+<!-- ===== Overview Stats ===== -->
+<section class="section" id="overview">
+  <div class="section-header">
+    <div class="section-number">01 / OVERVIEW</div>
+    <h2 class="section-title">设计概览</h2>
+    <p class="section-subtitle">五张核心业务表，覆盖从用户注册到番剧收藏、评价、推荐的完整数据链路。</p>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="stat-value">1</div>
+      <div class="stat-label">用户表 user</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      <div class="stat-value">1</div>
+      <div class="stat-label">番剧表 anime</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div class="stat-value">1</div>
+      <div class="stat-label">收藏表 collection</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div class="stat-value">1</div>
+      <div class="stat-label">评价表 review</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="18" cy="5" r="3"/>
+          <circle cx="6" cy="12" r="3"/>
+          <circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+      </div>
+      <div class="stat-value">1</div>
+      <div class="stat-label">推荐表 recommend</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ER Diagram ===== -->
+<section class="section" id="er-diagram">
+  <div class="section-header">
+    <div class="section-number">02 / ER DIAGRAM</div>
+    <h2 class="section-title">实体关系图</h2>
+    <p class="section-subtitle">anime 表为核心主数据表，collection、review、recommend 均通过 anime_id 外键关联；所有业务表预留 user_id 支持多用户扩展。</p>
+  </div>
+  <div class="er-container">
+    <div class="er-diagram">
+      <!-- User Table -->
+      <div class="er-row">
+        <div class="er-table">
+          <div class="er-table-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            user
+          </div>
+          <div class="er-table-body">
+            <div class="er-field"><span class="pk">PK</span><span class="field-name">id</span></div>
+            <div class="er-field"><span class="field-name">username</span></div>
+            <div class="er-field"><span class="field-name">password</span></div>
+            <div class="er-field"><span class="field-name">nickname</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connectors from user -->
+      <div class="er-connector">
+        <div class="line"></div>
+        <span class="label">1 : N (user_id)</span>
+        <div class="line"></div>
+      </div>
+
+      <!-- Central: anime -->
+      <div class="er-row">
+        <div class="er-table central" style="min-width: 260px;">
+          <div class="er-table-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            anime（核心主表）
+          </div>
+          <div class="er-table-body">
+            <div class="er-field"><span class="pk">PK</span><span class="field-name">id</span></div>
+            <div class="er-field"><span class="field-name">title</span></div>
+            <div class="er-field"><span class="field-name">type</span></div>
+            <div class="er-field"><span class="field-name">episodes</span></div>
+            <div class="er-field"><span class="field-name">rating</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connectors from anime -->
+      <div class="er-connector">
+        <div class="line"></div>
+        <span class="label">1 : N (anime_id) / ON DELETE CASCADE</span>
+        <div class="line"></div>
+      </div>
+
+      <!-- Three child tables -->
+      <div class="er-row">
+        <div class="er-table">
+          <div class="er-table-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+            collection
+          </div>
+          <div class="er-table-body">
+            <div class="er-field"><span class="pk">PK</span><span class="field-name">id</span></div>
+            <div class="er-field"><span class="fk">FK</span><span class="field-name">user_id</span></div>
+            <div class="er-field"><span class="fk">FK</span><span class="field-name">anime_id</span></div>
+            <div class="er-field"><span class="field-name">list_type</span></div>
+            <div class="er-field"><span class="field-name">progress</span></div>
+          </div>
+        </div>
+
+        <div class="er-table">
+          <div class="er-table-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            review
+          </div>
+          <div class="er-table-body">
+            <div class="er-field"><span class="pk">PK</span><span class="field-name">id</span></div>
+            <div class="er-field"><span class="fk">FK</span><span class="field-name">user_id</span></div>
+            <div class="er-field"><span class="fk">FK</span><span class="field-name">anime_id</span></div>
+            <div class="er-field"><span class="field-name">rating</span></div>
+            <div class="er-field"><span class="field-name">content</span></div>
+          </div>
+        </div>
+
+        <div class="er-table">
+          <div class="er-table-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2">
+              <circle cx="18" cy="5" r="3"/>
+              <circle cx="6" cy="12" r="3"/>
+              <circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            recommend
+          </div>
+          <div class="er-table-body">
+            <div class="er-field"><span class="pk">PK</span><span class="field-name">id</span></div>
+            <div class="er-field"><span class="fk">FK</span><span class="field-name">user_id</span></div>
+            <div class="er-field"><span class="fk">FK</span><span class="field-name">anime_id</span></div>
+            <div class="er-field"><span class="field-name">reason</span></div>
+            <div class="er-field"><span class="field-name">tags</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="er-legend">
+        <div class="er-legend-item">
+          <span class="icon" style="background: var(--accent-orange);"></span>
+          PK 主键
+        </div>
+        <div class="er-legend-item">
+          <span class="icon" style="background: var(--accent-purple);"></span>
+          FK 外键
+        </div>
+        <div class="er-legend-item">
+          <span class="icon" style="background: var(--accent-cyan);"></span>
+          UK 唯一键
+        </div>
+        <div class="er-legend-item">
+          <span class="icon" style="background: var(--accent-blue);"></span>
+          核心主表
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Table Details ===== -->
+<section class="section" id="tables">
+  <div class="section-header">
+    <div class="section-number">03 / TABLE STRUCTURE</div>
+    <h2 class="section-title">表结构详情</h2>
+    <p class="section-subtitle">五张表的完整字段定义、数据类型、约束条件与业务注释。</p>
+  </div>
+
+  <div class="tables-grid">
+    <!-- User Table -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <div class="table-card-title">
+          <span class="table-name">user</span>
+          <span class="table-desc">用户表（预留多用户，单人站点可仅插入1条数据）</span>
+        </div>
+        <div class="table-badges">
+          <span class="table-badge engine">InnoDB</span>
+          <span class="table-badge charset">utf8mb4</span>
+        </div>
+      </div>
+      <table class="table-fields">
+        <thead>
+          <tr>
+            <th>字段名</th>
+            <th>类型</th>
+            <th>非空</th>
+            <th>默认值</th>
+            <th>键</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name-cell">id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td><span class="field-default-cell">AUTO_INCREMENT</span></td>
+            <td><span class="key-tag pk">PK</span></td>
+            <td class="field-comment-cell">主键</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">username</span></td>
+            <td><span class="field-type-cell">VARCHAR(50)</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td><span class="key-tag uk">UK</span></td>
+            <td class="field-comment-cell">账号</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">password</span></td>
+            <td><span class="field-type-cell">VARCHAR(64)</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td>—</td>
+            <td class="field-comment-cell">密码，BCrypt 加密存储，禁止 MD5</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">nickname</span></td>
+            <td><span class="field-type-cell">VARCHAR(50)</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">昵称</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">avatar</span></td>
+            <td><span class="field-type-cell">VARCHAR(255)</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">头像 URL</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">register_time</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">注册时间</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">update_time</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">ON UPDATE CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">信息更新时间</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Anime Table -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <div class="table-card-title">
+          <span class="table-name">anime</span>
+          <span class="table-desc">番剧/漫画资料表（核心主数据表）</span>
+        </div>
+        <div class="table-badges">
+          <span class="table-badge engine">InnoDB</span>
+          <span class="table-badge charset">utf8mb4</span>
+        </div>
+      </div>
+      <table class="table-fields">
+        <thead>
+          <tr>
+            <th>字段名</th>
+            <th>类型</th>
+            <th>非空</th>
+            <th>默认值</th>
+            <th>键</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name-cell">id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td><span class="field-default-cell">AUTO_INCREMENT</span></td>
+            <td><span class="key-tag pk">PK</span></td>
+            <td class="field-comment-cell">主键</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">title</span></td>
+            <td><span class="field-type-cell">VARCHAR(100)</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td><span class="key-tag" style="background:rgba(88,166,255,0.15);color:var(--accent-blue);">IDX</span></td>
+            <td class="field-comment-cell">中文标题</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">original_title</span></td>
+            <td><span class="field-type-cell">VARCHAR(100)</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">原名</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">cover</span></td>
+            <td><span class="field-type-cell">VARCHAR(255)</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">封面图片 URL</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">type</span></td>
+            <td><span class="field-type-cell">TINYINT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">1</span></td>
+            <td><span class="key-tag" style="background:rgba(88,166,255,0.15);color:var(--accent-blue);">IDX</span></td>
+            <td class="field-comment-cell">类型：1=动画 2=漫画</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">genre</span></td>
+            <td><span class="field-type-cell">VARCHAR(100)</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">类型标签，逗号分隔；大数据量建议拆标签中间表</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">episodes</span></td>
+            <td><span class="field-type-cell">INT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">0</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">集数/话数，业务保证 &gt;= 0</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">status</span></td>
+            <td><span class="field-type-cell">TINYINT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">0</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">连载状态：0=连载中 1=已完结</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">year</span></td>
+            <td><span class="field-type-cell">INT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">播出/连载年份</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">rating</span></td>
+            <td><span class="field-type-cell">DECIMAL(3,1)</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">平均评分（0.0 ~ 10.0），冗余字段，review 变更需同步更新</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">synopsis</span></td>
+            <td><span class="field-type-cell">TEXT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td>—</td>
+            <td>—</td>
+            <td class="field-comment-cell">简介</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">created_at</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">录入时间</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">updated_at</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">ON UPDATE CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">修改时间</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Collection Table -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <div class="table-card-title">
+          <span class="table-name">collection</span>
+          <span class="table-desc">收藏/追番表（同一用户对同一部番只能一条记录）</span>
+        </div>
+        <div class="table-badges">
+          <span class="table-badge engine">InnoDB</span>
+          <span class="table-badge charset">utf8mb4</span>
+        </div>
+      </div>
+      <table class="table-fields">
+        <thead>
+          <tr>
+            <th>字段名</th>
+            <th>类型</th>
+            <th>非空</th>
+            <th>默认值</th>
+            <th>键</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name-cell">id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td><span class="field-default-cell">AUTO_INCREMENT</span></td>
+            <td><span class="key-tag pk">PK</span></td>
+            <td class="field-comment-cell">主键</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">user_id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td><span class="key-tag fk">FK</span></td>
+            <td class="field-comment-cell">用户 ID</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">anime_id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td><span class="key-tag fk">FK</span></td>
+            <td class="field-comment-cell">番剧 ID</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">list_type</span></td>
+            <td><span class="field-type-cell">TINYINT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">1</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">收藏类型：1=想看 2=在看 3=已看完 4=搁置 5=最爱</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">progress</span></td>
+            <td><span class="field-type-cell">INT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">0</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">看到第几集/话，业务校验 0 &lt;= progress &lt;= episodes</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">favorite</span></td>
+            <td><span class="field-type-cell">TINYINT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">0</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">是否加精收藏：0=否 1=是</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">created_at</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">收藏时间</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">updated_at</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">ON UPDATE CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">更新时间</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Review Table -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <div class="table-card-title">
+          <span class="table-name">review</span>
+          <span class="table-desc">评价表（用户对番剧的评分与文字评价）</span>
+        </div>
+        <div class="table-badges">
+          <span class="table-badge engine">InnoDB</span>
+          <span class="table-badge charset">utf8mb4</span>
+        </div>
+      </div>
+      <table class="table-fields">
+        <thead>
+          <tr>
+            <th>字段名</th>
+            <th>类型</th>
+            <th>非空</th>
+            <th>默认值</th>
+            <th>键</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name-cell">id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td><span class="field-default-cell">AUTO_INCREMENT</span></td>
+            <td><span class="key-tag pk">PK</span></td>
+            <td class="field-comment-cell">主键</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">user_id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td><span class="key-tag fk">FK</span></td>
+            <td class="field-comment-cell">用户 ID</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">anime_id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td><span class="key-tag fk">FK</span></td>
+            <td class="field-comment-cell">番剧 ID</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">rating</span></td>
+            <td><span class="field-type-cell">INT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td>—</td>
+            <td class="field-comment-cell">评分（1 ~ 10）</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">content</span></td>
+            <td><span class="field-type-cell">TEXT</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td>—</td>
+            <td>—</td>
+            <td class="field-comment-cell">评价内容</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">created_at</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">评价时间</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">updated_at</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">ON UPDATE CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">修改时间</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recommend Table -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <div class="table-card-title">
+          <span class="table-name">recommend</span>
+          <span class="table-desc">推荐表（用户对番剧的推荐理由与标签）</span>
+        </div>
+        <div class="table-badges">
+          <span class="table-badge engine">InnoDB</span>
+          <span class="table-badge charset">utf8mb4</span>
+        </div>
+      </div>
+      <table class="table-fields">
+        <thead>
+          <tr>
+            <th>字段名</th>
+            <th>类型</th>
+            <th>非空</th>
+            <th>默认值</th>
+            <th>键</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name-cell">id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td><span class="field-default-cell">AUTO_INCREMENT</span></td>
+            <td><span class="key-tag pk">PK</span></td>
+            <td class="field-comment-cell">主键</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">user_id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td><span class="key-tag fk">FK</span></td>
+            <td class="field-comment-cell">用户 ID</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">anime_id</span></td>
+            <td><span class="field-type-cell">BIGINT</span></td>
+            <td><span class="field-null-cell not-null">NOT NULL</span></td>
+            <td>—</td>
+            <td><span class="key-tag fk">FK</span></td>
+            <td class="field-comment-cell">番剧 ID</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">reason</span></td>
+            <td><span class="field-type-cell">VARCHAR(255)</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">推荐理由</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">tags</span></td>
+            <td><span class="field-type-cell">VARCHAR(100)</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">NULL</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">推荐标签，如：治愈,神作</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">created_at</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">推荐时间</td>
+          </tr>
+          <tr>
+            <td><span class="field-name-cell">updated_at</span></td>
+            <td><span class="field-type-cell">DATETIME</span></td>
+            <td><span class="field-null-cell nullable">NULL</span></td>
+            <td><span class="field-default-cell">ON UPDATE CURRENT_TIMESTAMP</span></td>
+            <td>—</td>
+            <td class="field-comment-cell">修改时间</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DDL Code ===== -->
+<section class="section" id="ddl">
+  <div class="section-header">
+    <div class="section-number">04 / DDL</div>
+    <h2 class="section-title">完整建表语句</h2>
+    <p class="section-subtitle">可直接复制执行的 MySQL DDL 脚本，包含建库、建表、外键约束与索引。</p>
+  </div>
+
+  <div class="code-section">
+    <div class="code-header">
+      <div class="code-header-left">
+        <div class="code-dots">
+          <span class="code-dot red"></span>
+          <span class="code-dot yellow"></span>
+          <span class="code-dot green"></span>
+        </div>
+        <span class="code-filename">semitris_acg_schema.sql</span>
+      </div>
+      <button class="copy-btn" onclick="copyCode(this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+        复制代码
+      </button>
+    </div>
+    <div class="code-body">
+      <pre id="sql-code"><span class="tok-comment">-- ============================================</span>
+<span class="tok-comment">-- semitris_acg 数据库设计（优化版）</span>
+<span class="tok-comment">-- 修复：rating 精度、外键级联、预留多用户</span>
+<span class="tok-comment">-- ============================================</span>
+
+<span class="tok-keyword">CREATE DATABASE</span> <span class="tok-keyword">IF NOT EXISTS</span> <span class="tok-identifier">semitris_acg</span>
+  <span class="tok-keyword">DEFAULT CHARACTER SET</span> <span class="tok-type">utf8mb4</span>
+  <span class="tok-keyword">COLLATE</span> <span class="tok-string">utf8mb4_unicode_ci</span>;
+
+<span class="tok-keyword">USE</span> <span class="tok-identifier">semitris_acg</span>;
+
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-comment">-- 1. user 用户表</span>
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-keyword">CREATE TABLE</span> <span class="tok-identifier">`user`</span> (
+    <span class="tok-identifier">id</span>            <span class="tok-type">BIGINT</span>       <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">AUTO_INCREMENT</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'主键'</span>,
+    <span class="tok-identifier">username</span>      <span class="tok-type">VARCHAR</span>(<span class="tok-number">50</span>)  <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'账号'</span>,
+    <span class="tok-identifier">password</span>      <span class="tok-type">VARCHAR</span>(<span class="tok-number">64</span>)  <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'密码，BCrypt加密存储，禁止MD5'</span>,
+    <span class="tok-identifier">nickname</span>      <span class="tok-type">VARCHAR</span>(<span class="tok-number">50</span>)  <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'昵称'</span>,
+    <span class="tok-identifier">avatar</span>        <span class="tok-type">VARCHAR</span>(<span class="tok-number">255</span>) <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'头像 URL'</span>,
+    <span class="tok-identifier">register_time</span> <span class="tok-type">DATETIME</span>     <span class="tok-keyword">DEFAULT</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'注册时间'</span>,
+    <span class="tok-identifier">update_time</span>   <span class="tok-type">DATETIME</span>     <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">ON UPDATE</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'信息更新时间'</span>,
+    <span class="tok-keyword">PRIMARY KEY</span> (<span class="tok-identifier">id</span>),
+    <span class="tok-keyword">UNIQUE KEY</span> <span class="tok-identifier">uk_username</span> (<span class="tok-identifier">username</span>)
+) <span class="tok-type">ENGINE</span>=<span class="tok-identifier">InnoDB</span> <span class="tok-type">DEFAULT CHARSET</span>=<span class="tok-type">utf8mb4</span> <span class="tok-keyword">COMMENT</span>=<span class="tok-string">'用户表（预留多用户，单人站点可仅插入1条用户数据）'</span>;
+
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-comment">-- 2. anime 番剧/漫画表</span>
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-keyword">CREATE TABLE</span> <span class="tok-identifier">`anime`</span> (
+    <span class="tok-identifier">id</span>             <span class="tok-type">BIGINT</span>       <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">AUTO_INCREMENT</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'主键'</span>,
+    <span class="tok-identifier">title</span>          <span class="tok-type">VARCHAR</span>(<span class="tok-number">100</span>) <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'中文标题'</span>,
+    <span class="tok-identifier">original_title</span> <span class="tok-type">VARCHAR</span>(<span class="tok-number">100</span>) <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'原名'</span>,
+    <span class="tok-identifier">cover</span>          <span class="tok-type">VARCHAR</span>(<span class="tok-number">255</span>) <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'封面图片 URL'</span>,
+    <span class="tok-identifier">type</span>           <span class="tok-type">TINYINT</span>      <span class="tok-keyword">DEFAULT</span> <span class="tok-number">1</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'类型：1=动画 2=漫画'</span>,
+    <span class="tok-identifier">genre</span>          <span class="tok-type">VARCHAR</span>(<span class="tok-number">100</span>) <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'类型标签，逗号分隔；大数据量建议拆标签中间表'</span>,
+    <span class="tok-identifier">episodes</span>       <span class="tok-type">INT</span>          <span class="tok-keyword">DEFAULT</span> <span class="tok-number">0</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'集数/话数，业务保证&gt;=0'</span>,
+    <span class="tok-identifier">status</span>         <span class="tok-type">TINYINT</span>      <span class="tok-keyword">DEFAULT</span> <span class="tok-number">0</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'连载状态：0=连载中 1=已完结'</span>,
+    <span class="tok-identifier">year</span>           <span class="tok-type">INT</span>          <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'播出/连载年份'</span>,
+    <span class="tok-identifier">rating</span>         <span class="tok-type">DECIMAL</span>(<span class="tok-number">3</span>,<span class="tok-number">1</span>) <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'平均评分（0.0 ~ 10.0），冗余字段，review变更需同步更新'</span>,
+    <span class="tok-identifier">synopsis</span>       <span class="tok-type">TEXT</span>         <span class="tok-keyword">COMMENT</span> <span class="tok-string">'简介'</span>,
+    <span class="tok-identifier">created_at</span>     <span class="tok-type">DATETIME</span>     <span class="tok-keyword">DEFAULT</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'录入时间'</span>,
+    <span class="tok-identifier">updated_at</span>     <span class="tok-type">DATETIME</span>     <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">ON UPDATE</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'修改时间'</span>,
+    <span class="tok-keyword">PRIMARY KEY</span> (<span class="tok-identifier">id</span>),
+    <span class="tok-keyword">KEY</span> <span class="tok-identifier">idx_type</span> (<span class="tok-identifier">type</span>),
+    <span class="tok-keyword">KEY</span> <span class="tok-identifier">idx_title</span> (<span class="tok-identifier">title</span>)
+) <span class="tok-type">ENGINE</span>=<span class="tok-identifier">InnoDB</span> <span class="tok-type">DEFAULT CHARSET</span>=<span class="tok-type">utf8mb4</span> <span class="tok-keyword">COMMENT</span>=<span class="tok-string">'番剧/漫画资料表'</span>;
+
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-comment">-- 3. collection 收藏/追番表</span>
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-keyword">CREATE TABLE</span> <span class="tok-identifier">`collection`</span> (
+    <span class="tok-identifier">id</span>         <span class="tok-type">BIGINT</span>   <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">AUTO_INCREMENT</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'主键'</span>,
+    <span class="tok-identifier">user_id</span>    <span class="tok-type">BIGINT</span>   <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'用户ID'</span>,
+    <span class="tok-identifier">anime_id</span>   <span class="tok-type">BIGINT</span>   <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'番剧 ID'</span>,
+    <span class="tok-identifier">list_type</span>  <span class="tok-type">TINYINT</span>  <span class="tok-keyword">DEFAULT</span> <span class="tok-number">1</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'收藏类型：1=想看 2=在看 3=已看完 4=搁置 5=最爱'</span>,
+    <span class="tok-identifier">progress</span>   <span class="tok-type">INT</span>      <span class="tok-keyword">DEFAULT</span> <span class="tok-number">0</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'看到第几集/话，业务校验0 &lt;= progress &lt;= episodes'</span>,
+    <span class="tok-identifier">favorite</span>   <span class="tok-type">TINYINT</span>  <span class="tok-keyword">DEFAULT</span> <span class="tok-number">0</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'是否加精收藏：0=否 1=是'</span>,
+    <span class="tok-identifier">created_at</span> <span class="tok-type">DATETIME</span> <span class="tok-keyword">DEFAULT</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'收藏时间'</span>,
+    <span class="tok-identifier">updated_at</span> <span class="tok-type">DATETIME</span> <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">ON UPDATE</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'更新时间'</span>,
+    <span class="tok-keyword">PRIMARY KEY</span> (<span class="tok-identifier">id</span>),
+    <span class="tok-keyword">UNIQUE KEY</span> <span class="tok-identifier">uk_user_anime</span> (<span class="tok-identifier">user_id</span>, <span class="tok-identifier">anime_id</span>),
+    <span class="tok-keyword">CONSTRAINT</span> <span class="tok-identifier">fk_collection_user</span> <span class="tok-keyword">FOREIGN KEY</span> (<span class="tok-identifier">user_id</span>) <span class="tok-keyword">REFERENCES</span> <span class="tok-identifier">`user`</span> (<span class="tok-identifier">id</span>) <span class="tok-keyword">ON DELETE</span> <span class="tok-keyword">CASCADE</span>,
+    <span class="tok-keyword">CONSTRAINT</span> <span class="tok-identifier">fk_collection_anime</span> <span class="tok-keyword">FOREIGN KEY</span> (<span class="tok-identifier">anime_id</span>) <span class="tok-keyword">REFERENCES</span> <span class="tok-identifier">anime</span> (<span class="tok-identifier">id</span>) <span class="tok-keyword">ON DELETE</span> <span class="tok-keyword">CASCADE</span>
+) <span class="tok-type">ENGINE</span>=<span class="tok-identifier">InnoDB</span> <span class="tok-type">DEFAULT CHARSET</span>=<span class="tok-type">utf8mb4</span> <span class="tok-keyword">COMMENT</span>=<span class="tok-string">'收藏/追番表'</span>;
+
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-comment">-- 4. review 评价表</span>
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-keyword">CREATE TABLE</span> <span class="tok-identifier">`review`</span> (
+    <span class="tok-identifier">id</span>         <span class="tok-type">BIGINT</span>   <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">AUTO_INCREMENT</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'主键'</span>,
+    <span class="tok-identifier">user_id</span>    <span class="tok-type">BIGINT</span>   <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'用户ID'</span>,
+    <span class="tok-identifier">anime_id</span>   <span class="tok-type">BIGINT</span>   <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'番剧 ID'</span>,
+    <span class="tok-identifier">rating</span>     <span class="tok-type">INT</span>      <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'评分（1 ~ 10）'</span>,
+    <span class="tok-identifier">content</span>    <span class="tok-type">TEXT</span>     <span class="tok-keyword">COMMENT</span> <span class="tok-string">'评价内容'</span>,
+    <span class="tok-identifier">created_at</span> <span class="tok-type">DATETIME</span> <span class="tok-keyword">DEFAULT</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'评价时间'</span>,
+    <span class="tok-identifier">updated_at</span> <span class="tok-type">DATETIME</span> <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">ON UPDATE</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'修改时间'</span>,
+    <span class="tok-keyword">PRIMARY KEY</span> (<span class="tok-identifier">id</span>),
+    <span class="tok-keyword">KEY</span> <span class="tok-identifier">idx_anime</span> (<span class="tok-identifier">anime_id</span>),
+    <span class="tok-keyword">KEY</span> <span class="tok-identifier">idx_user</span> (<span class="tok-identifier">user_id</span>),
+    <span class="tok-keyword">CONSTRAINT</span> <span class="tok-identifier">fk_review_user</span> <span class="tok-keyword">FOREIGN KEY</span> (<span class="tok-identifier">user_id</span>) <span class="tok-keyword">REFERENCES</span> <span class="tok-identifier">`user`</span> (<span class="tok-identifier">id</span>) <span class="tok-keyword">ON DELETE</span> <span class="tok-keyword">CASCADE</span>,
+    <span class="tok-keyword">CONSTRAINT</span> <span class="tok-identifier">fk_review_anime</span> <span class="tok-keyword">FOREIGN KEY</span> (<span class="tok-identifier">anime_id</span>) <span class="tok-keyword">REFERENCES</span> <span class="tok-identifier">anime</span> (<span class="tok-identifier">id</span>) <span class="tok-keyword">ON DELETE</span> <span class="tok-keyword">CASCADE</span>
+) <span class="tok-type">ENGINE</span>=<span class="tok-identifier">InnoDB</span> <span class="tok-type">DEFAULT CHARSET</span>=<span class="tok-type">utf8mb4</span> <span class="tok-keyword">COMMENT</span>=<span class="tok-string">'评价表'</span>;
+
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-comment">-- 5. recommend 推荐表</span>
+<span class="tok-comment">-- --------------------------------------------</span>
+<span class="tok-keyword">CREATE TABLE</span> <span class="tok-identifier">`recommend`</span> (
+    <span class="tok-identifier">id</span>         <span class="tok-type">BIGINT</span>       <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">AUTO_INCREMENT</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'主键'</span>,
+    <span class="tok-identifier">user_id</span>    <span class="tok-type">BIGINT</span>       <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'用户ID'</span>,
+    <span class="tok-identifier">anime_id</span>   <span class="tok-type">BIGINT</span>       <span class="tok-keyword">NOT NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'番剧 ID'</span>,
+    <span class="tok-identifier">reason</span>     <span class="tok-type">VARCHAR</span>(<span class="tok-number">255</span>) <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'推荐理由'</span>,
+    <span class="tok-identifier">tags</span>       <span class="tok-type">VARCHAR</span>(<span class="tok-number">100</span>) <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'推荐标签，如：治愈,神作'</span>,
+    <span class="tok-identifier">created_at</span> <span class="tok-type">DATETIME</span>     <span class="tok-keyword">DEFAULT</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'推荐时间'</span>,
+    <span class="tok-identifier">updated_at</span> <span class="tok-type">DATETIME</span>     <span class="tok-keyword">DEFAULT</span> <span class="tok-keyword">NULL</span> <span class="tok-keyword">ON UPDATE</span> <span class="tok-function">CURRENT_TIMESTAMP</span> <span class="tok-keyword">COMMENT</span> <span class="tok-string">'修改时间'</span>,
+    <span class="tok-keyword">PRIMARY KEY</span> (<span class="tok-identifier">id</span>),
+    <span class="tok-keyword">KEY</span> <span class="tok-identifier">idx_anime</span> (<span class="tok-identifier">anime_id</span>),
+    <span class="tok-keyword">KEY</span> <span class="tok-identifier">idx_user</span> (<span class="tok-identifier">user_id</span>),
+    <span class="tok-keyword">CONSTRAINT</span> <span class="tok-identifier">fk_recommend_user</span> <span class="tok-keyword">FOREIGN KEY</span> (<span class="tok-identifier">user_id</span>) <span class="tok-keyword">REFERENCES</span> <span class="tok-identifier">`user`</span> (<span class="tok-identifier">id</span>) <span class="tok-keyword">ON DELETE</span> <span class="tok-keyword">CASCADE</span>,
+    <span class="tok-keyword">CONSTRAINT</span> <span class="tok-identifier">fk_recommend_anime</span> <span class="tok-keyword">FOREIGN KEY</span> (<span class="tok-identifier">anime_id</span>) <span class="tok-keyword">REFERENCES</span> <span class="tok-identifier">anime</span> (<span class="tok-identifier">id</span>) <span class="tok-keyword">ON DELETE</span> <span class="tok-keyword">CASCADE</span>
+) <span class="tok-type">ENGINE</span>=<span class="tok-identifier">InnoDB</span> <span class="tok-type">DEFAULT CHARSET</span>=<span class="tok-type">utf8mb4</span> <span class="tok-keyword">COMMENT</span>=<span class="tok-string">'推荐表'</span>;</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Optimization Notes ===== -->
+<section class="section" id="optimization">
+  <div class="section-header">
+    <div class="section-number">05 / OPTIMIZATION</div>
+    <h2 class="section-title">优化说明</h2>
+    <p class="section-subtitle">相比原设计，本次优化修复了精度缺陷、完善了级联约束、预留了多用户扩展能力。</p>
+  </div>
+
+  <div class="opt-grid">
+    <div class="opt-card fix">
+      <div class="opt-card-header">
+        <span class="opt-tag fix">BUG 修复</span>
+        <span class="opt-title">rating 精度修复</span>
+      </div>
+      <p class="opt-desc">
+        原设计 <code>DECIMAL(2,1)</code> 最大只能存 9.9，无法存储 10.0 满分。
+        已修改为 <code>DECIMAL(3,1)</code>，支持 0.0 ~ 10.0 完整评分范围。
+      </p>
+    </div>
+
+    <div class="opt-card fix">
+      <div class="opt-card-header">
+        <span class="opt-tag fix">BUG 修复</span>
+        <span class="opt-title">外键级联删除</span>
+      </div>
+      <p class="opt-desc">
+        原设计外键未指定 <code>ON DELETE</code>，默认 RESTRICT 导致存在子记录时无法删除番剧。
+        已统一添加 <code>ON DELETE CASCADE</code>，删除番剧自动清理关联的收藏、评价、推荐。
+      </p>
+    </div>
+
+    <div class="opt-card improve">
+      <div class="opt-card-header">
+        <span class="opt-tag improve">结构优化</span>
+        <span class="opt-title">预留多用户扩展</span>
+      </div>
+      <p class="opt-desc">
+        原设计业务表缺少 <code>user_id</code>，仅支持严格单人场景。
+        已在 collection、review、recommend 表增加 user_id 字段与外键，
+        联合唯一索引改为 <code>uk_user_anime(user_id, anime_id)</code>，未来可无缝扩展多用户。
+      </p>
+    </div>
+
+    <div class="opt-card improve">
+      <div class="opt-card-header">
+        <span class="opt-tag improve">结构优化</span>
+        <span class="opt-title">补充更新时间字段</span>
+      </div>
+      <p class="opt-desc">
+        原设计 user、review、recommend 表缺少更新时间。
+        已统一补充 <code>updated_at</code> / <code>update_time</code> 字段，
+        使用 <code>ON UPDATE CURRENT_TIMESTAMP</code> 自动维护。
+      </p>
+    </div>
+
+    <div class="opt-card feature">
+      <div class="opt-card-header">
+        <span class="opt-tag feature">安全增强</span>
+        <span class="opt-title">密码加密方案</span>
+      </div>
+      <p class="opt-desc">
+        原设计注释使用 MD5 存储密码，存在撞库风险。
+        已修改注释明确要求使用 <code>BCrypt</code> 加密存储，
+        字段长度 VARCHAR(64) 可容纳 BCrypt 哈希结果。
+      </p>
+    </div>
+
+    <div class="opt-card feature">
+      <div class="opt-card-header">
+        <span class="opt-tag feature">业务约束</span>
+        <span class="opt-title">冗余字段一致性</span>
+      </div>
+      <p class="opt-desc">
+        <code>anime.rating</code> 为冗余计算字段，存储 review 表评分的平均值。
+        业务层必须在新增、修改、删除 review 时重新 AVG 计算并更新此字段，
+        否则会出现数据不一致。如需强一致性可考虑去掉此字段，查询时实时聚合。
+      </p>
+    </div>
+
+    <div class="opt-card improve">
+      <div class="opt-card-header">
+        <span class="opt-tag improve">扩展性</span>
+        <span class="opt-title">标签字段说明</span>
+      </div>
+      <p class="opt-desc">
+        <code>genre</code>、<code>tags</code> 使用逗号分隔字符串，适合小体量单人项目。
+        如后续需要标签筛选、统计、关联查询，建议新建 <code>tag</code> 与
+        <code>anime_tag</code> 中间表实现多对多关系。
+      </p>
+    </div>
+
+    <div class="opt-card improve">
+      <div class="opt-card-header">
+        <span class="opt-tag improve">扩展性</span>
+        <span class="opt-title">推荐表扩展建议</span>
+      </div>
+      <p class="opt-desc">
+        当前 recommend 表仅支持对单部番写推荐评语。
+        如需实现「看了 A 推荐 B」的相似番剧推荐场景，
+        可增加 <code>target_anime_id BIGINT</code> 字段表达推荐目标。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+  <p class="footer-mono">semitris_acg Database Design v2.0</p>
+  <p style="margin-top: 8px;">MySQL 8.0 / InnoDB / utf8mb4_unicode_ci</p>
+</footer>
+
+<script>
+  function copyCode(btn) {
+    const codeEl = document.getElementById('sql-code');
+    const text = codeEl.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> 已复制';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> 复制代码';
+      }, 2000);
+    });
+  }
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        const offset = 70;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
