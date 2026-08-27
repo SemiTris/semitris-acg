@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: semitris-acg
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/semitris_acg
+    username: root
+    password: root
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.semitris.acg.entity
+
+pagehelper:
+  reasonable: true
+
+# 自定义配置：文件上传保存的本地目录（注意结尾必须有 /）
+semitris:
+  upload:
+    dir: D:/upload/
