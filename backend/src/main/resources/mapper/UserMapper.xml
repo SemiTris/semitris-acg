@@ -2,5 +2,55 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.semitris.acg.mapper.UserMapper">
+    <!--  1.新增用户  -->
+    <insert id="insertUser" parameterType="User">
+        insert into user (id, name, password, email, phone, create_time, update_time)
+        values (#{id}, #{name}, #{password}, #{email}, #{phone}, #{createTime}, #{updateTime})
+    </insert>
+
+    <!--  2.根据id查询用户  -->
+    <delete id="deleteUserById">
+        delete
+        from user
+        where id = #{id}
+    </delete>
+
+    <!--  3.根据id更新用户  -->
+    <update id="updateUser">
+        update user
+        set name        = #{name},
+            password    = #{password},
+            email       = #{email},
+            phone       = #{phone},
+            update_time = #{updateTime}
+    </update>
+
+    <!--  4.根据id查询用户  -->
+    <select id="selectUserById" resultType="com.semitris.acg.entity.User">
+        select *
+        from user
+        where id = #{id}
+    </select>
+
+    <!--  5.查询所有用户  -->
+    <select id="selectAllUser" resultType="com.semitris.acg.entity.User">
+        select *
+        from user
+    </select>
+
+    <!--  6.根据条件查询用户  -->
+    <select id="selectUserByCondition" resultType="com.semitris.acg.entity.User">
+        select * from user
+        <where>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="nickname != null and nickname != ''">
+                AND nickname LIKE CONCAT('%', #{nickname}, '%')
+            </if>
+        </where>
+        ORDER BY id ASC
+    </select>
+
 
 </mapper>

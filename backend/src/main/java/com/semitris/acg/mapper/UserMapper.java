@@ -1,4 +1,28 @@
 package com.semitris.acg.mapper;
 
+import com.semitris.acg.entity.User;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
 public interface UserMapper {
+
+    //1.新增用户
+    int insertUser(User user);
+
+    //2.删除用户(根据id删除用户)
+    int deleteUserById(int id);
+
+    //3.修改用户信息
+    int updateUser(User user);
+
+    //4.查询用户信息(根据id查询用户)
+    User selectUserById(int id);
+
+    //5.查询所有用户信息
+    List<User> selectAllUser();
+
+    //6.多条件查询用户信息
+    List<User> selectUserByCondition(@Param("username") String username,
+                                     @Param("nickname") String nickname);
 }
