@@ -1,10 +1,12 @@
 package com.semitris.acg.mapper;
 
 import com.semitris.acg.entity.User;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+@Mapper
 public interface UserMapper {
 
     //1.新增用户

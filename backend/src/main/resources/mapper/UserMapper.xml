@@ -4,8 +4,8 @@
 <mapper namespace="com.semitris.acg.mapper.UserMapper">
     <!--  1.新增用户  -->
     <insert id="insertUser" parameterType="User">
-        insert into user (id, name, password, email, phone, create_time, update_time)
-        values (#{id}, #{name}, #{password}, #{email}, #{phone}, #{createTime}, #{updateTime})
+        insert into user (id, username, password, nickname, avatar, register_time, updated_at)
+        values (#{id}, #{username}, #{password}, #{nickname}, #{avatar}, #{registerTime}, #{updatedAt})
     </insert>
 
     <!--  2.根据id查询用户  -->
@@ -18,11 +18,12 @@
     <!--  3.根据id更新用户  -->
     <update id="updateUser">
         update user
-        set name        = #{name},
-            password    = #{password},
-            email       = #{email},
-            phone       = #{phone},
-            update_time = #{updateTime}
+        set username     = #{username},
+            password     = #{password},
+            nickname     = #{nickname},
+            avatar       = #{avatar},
+            updated_at   = #{updatedAt}
+        where id = #{id}
     </update>
 
     <!--  4.根据id查询用户  -->
