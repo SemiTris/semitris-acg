@@ -3,12 +3,10 @@ package com.semitris.acg.service.impl;
 import com.semitris.acg.entity.User;
 import com.semitris.acg.mapper.UserMapper;
 import com.semitris.acg.service.UserService;
+import com.semitris.acg.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -26,18 +24,19 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 新增用户
-     * <p>密码入库前使用MD5进行加密（暂时方案）</p>
+     * <p>密码入库前使用 BCrypt 加密（数据库规范禁止 MD5）</p>
      *
      * @param user 用户实体
      * @return 是否新增成功
      */
     @Override
     public boolean addUser(User user) {
-        if (user == null || user.getUsername() == null || user.getUsername().isEmpty()) {
+        if (user == null || user.getUsername() == null || user.getUsername().isEmpty()
+                || user.getPassword() == null || user.getPassword().isEmpty()) {
             return false;
         }
-        //密码MD5加密后入库
-        user.setPassword(md5(user.getPassword()));
+        //密码BCrypt加密后入库
+        user.setPassword(PasswordUtil.encode(user.getPassword()));
         return userMapper.insertUser(user) > 0;
     }
 
@@ -54,7 +53,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 修改用户信息
-     * <p>若传入了密码则一并做MD5加密处理</p>
+     * <p>若传入了密码则一并做 BCrypt 加密处理</p>
      *
      * @param user 用户实体（必须携带id）
      * @return 是否修改成功
@@ -65,7 +64,7 @@ public class UserServiceImpl implements UserService {
             return false;
         }
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            user.setPassword(md5(user.getPassword()));
+            user.setPassword(PasswordUtil.encode(user.getPassword()));
         }
         return userMapper.updateUser(user) > 0;
     }
@@ -103,29 +102,5 @@ public class UserServiceImpl implements UserService {
     public User[] getUserByCondition(String username, String nickname) {
         List<User> users = userMapper.selectUserByCondition(username, nickname);
         return users == null ? new User[0] : users.toArray(new User[0]);
-    }
-
-    /**
-     * MD5加密
-     *
-     * @param str 待加密字符串
-     * @return 加密后的32位十六进制字符串
-     */
-    private String md5(String str) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] digest = md.digest(str.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : digest) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    sb.append('0');
-                }
-                sb.append(hex);
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("MD5加密失败", e);
-        }
     }
 }
