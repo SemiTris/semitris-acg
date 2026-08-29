@@ -17,7 +17,7 @@
 
 ## 约定
 
-- 密码存 **MD5**（复用 sm03 的 MD5Util 思路，注册时加密、登录时比对）。
+- 密码存 **BCrypt**（数据库设计规范禁止 MD5；加密/比对用 `util/PasswordUtil`，注册时加密、登录时 `matches` 比对）。
 - 登录成功返回用户信息（不含密码）；失败返回 `R.error("账号或密码错误")`。
 
 ## 请求 / 响应示例
@@ -38,7 +38,7 @@
 |---|---|---|
 | id | Long | 主键 |
 | username | String | 账号（唯一） |
-| password | String | 密码（MD5，响应中不回传） |
+| password | String | 密码（BCrypt，响应中不回传） |
 | nickname | String | 昵称 |
 | avatar | String | 头像 URL |
 | registerTime | Date | 注册时间 |
