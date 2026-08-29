@@ -2,46 +2,48 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.semitris.acg.mapper.UserMapper">
-    <!--  1.新增用户  -->
-    <insert id="insertUser" parameterType="User">
-        insert into user (id, username, password, nickname, avatar, register_time, updated_at)
-        values (#{id}, #{username}, #{password}, #{nickname}, #{avatar}, #{registerTime}, #{updatedAt})
+    <!--  1.新增用户（id 自增、时间列走数据库默认值，均不手工写入）  -->
+    <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        insert into user (username, password, nickname, avatar)
+        values (#{username}, #{password}, #{nickname}, #{avatar})
     </insert>
 
-    <!--  2.根据id查询用户  -->
+    <!--  2.根据id删除用户  -->
     <delete id="deleteUserById">
         delete
         from user
         where id = #{id}
     </delete>
 
-    <!--  3.根据id更新用户  -->
+    <!--  3.根据id更新用户（动态更新，只改非空字段；updated_at 交给数据库 ON UPDATE 自动刷）  -->
     <update id="updateUser">
         update user
-        set username     = #{username},
-            password     = #{password},
-            nickname     = #{nickname},
-            avatar       = #{avatar},
-            updated_at   = #{updatedAt}
+        <set>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+        </set>
         where id = #{id}
     </update>
 
-    <!--  4.根据id查询用户  -->
-    <select id="selectUserById" resultType="com.semitris.acg.entity.User">
-        select *
+    <!--  4.根据id查询用户（不回传密码）  -->
+    <select id="selectUserById" resultType="User">
+        select id, username, nickname, avatar, register_time, updated_at
         from user
         where id = #{id}
     </select>
 
     <!--  5.查询所有用户  -->
-    <select id="selectAllUser" resultType="com.semitris.acg.entity.User">
+    <select id="selectAllUser" resultType="User">
         select *
         from user
     </select>
 
-    <!--  6.根据条件查询用户  -->
-    <select id="selectUserByCondition" resultType="com.semitris.acg.entity.User">
-        select * from user
+    <!--  6.多条件查询用户（不回传密码）  -->
+    <select id="selectUserByCondition" resultType="User">
+        select id, username, nickname, avatar, register_time, updated_at
+        from user
         <where>
             <if test="username != null and username != ''">
                 AND username LIKE CONCAT('%', #{username}, '%')
