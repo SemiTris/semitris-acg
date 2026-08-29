@@ -1,5 +1,7 @@
 package com.semitris.acg.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.semitris.acg.entity.User;
 import com.semitris.acg.mapper.UserMapper;
 import com.semitris.acg.service.UserService;
@@ -47,13 +49,13 @@ public class UserServiceImpl implements UserService {
      * @return 是否删除成功
      */
     @Override
-    public boolean removeUser(int id) {
+    public boolean removeUser(Long id) {
         return userMapper.deleteUserById(id) > 0;
     }
 
     /**
      * 修改用户信息
-     * <p>若传入了密码则一并做 BCrypt 加密处理</p>
+     * <p>若传入了密码则一并做 BCrypt 加密处理；空值字段不更新（动态 SQL）</p>
      *
      * @param user 用户实体（必须携带id）
      * @return 是否修改成功
@@ -76,31 +78,23 @@ public class UserServiceImpl implements UserService {
      * @return 用户实体，不存在时返回null
      */
     @Override
-    public User getUser(int id) {
+    public User getUser(Long id) {
         return userMapper.selectUserById(id);
     }
 
     /**
-     * 查询所有用户列表
+     * 分页多条件查询用户（用户名/昵称模糊查询）
      *
-     * @return 用户数组
+     * @param pageNum  页码（从1开始）
+     * @param pageSize 每页条数
+     * @param username 用户名（可选）
+     * @param nickname 昵称（可选）
+     * @return 分页结果 PageInfo
      */
     @Override
-    public User[] getAllUser() {
-        List<User> users = userMapper.selectAllUser();
-        return users == null ? new User[0] : users.toArray(new User[0]);
-    }
-
-    /**
-     * 多条件查询用户信息（用户名/昵称模糊查询）
-     *
-     * @param username 用户名
-     * @param nickname 昵称
-     * @return 用户数组
-     */
-    @Override
-    public User[] getUserByCondition(String username, String nickname) {
+    public PageInfo<User> getUserPage(int pageNum, int pageSize, String username, String nickname) {
+        PageHelper.startPage(pageNum, pageSize);
         List<User> users = userMapper.selectUserByCondition(username, nickname);
-        return users == null ? new User[0] : users.toArray(new User[0]);
+        return new PageInfo<>(users);
     }
 }

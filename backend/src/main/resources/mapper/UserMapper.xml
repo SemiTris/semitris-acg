@@ -34,13 +34,7 @@
         where id = #{id}
     </select>
 
-    <!--  5.查询所有用户  -->
-    <select id="selectAllUser" resultType="User">
-        select *
-        from user
-    </select>
-
-    <!--  6.多条件查询用户（不回传密码）  -->
+    <!--  5.多条件查询用户（不回传密码）  -->
     <select id="selectUserByCondition" resultType="User">
         select id, username, nickname, avatar, register_time, updated_at
         from user
