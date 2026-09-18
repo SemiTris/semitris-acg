@@ -42,6 +42,20 @@ public class UserController {
     }
 
     /**
+     * 登录（按 username 精确查 + BCrypt matches 比对；成功返回不含密码的用户信息）
+     *
+     * @param user 登录请求（仅 uusername/password 参与；契约为 { "username","password" }）
+     * @return 统一响应结果（成功 R.success("登录成功", user)，失败 R.error("账号或密码错误")）
+     */
+    @PostMapping("/login")
+    public R<User> login(@RequestBody User user) {
+        User loggedIn = userService.login(user.getUsername(), user.getPassword());
+        return loggedIn != null
+                ? R.success("登录成功", loggedIn)
+                : R.error("账号或密码错误");
+    }
+
+    /**
      * 根据id删除用户
      *
      * @param id 用户id

@@ -24,4 +24,7 @@ public interface UserMapper {
     //5.多条件查询用户信息(用户名/昵称模糊查询，分页由PageHelper完成)
     List<User> selectUserByCondition(@Param("username") String username,
                                      @Param("nickname") String nickname);
+
+    //6.按用户名精确查询(登录用；password 供 BCrypt matches 比对)
+    User selectByUsername(String username);
 }

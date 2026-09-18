@@ -97,4 +97,30 @@ public class UserServiceImpl implements UserService {
         List<User> users = userMapper.selectUserByCondition(username, nickname);
         return new PageInfo<>(users);
     }
+
+    /**
+     * 登录
+     * <p>按 username 精确查库，BCrypt matches 比对密码；成功返回用户信息（password 置空不回传），失败返回 null</p>
+     *
+     * @param username 账号
+     * @param password 明文密码
+     * @return 用户信息（不含密码），或登录失败返回 null
+     */
+    @Override
+    public User login(String username, String password) {
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            return null;
+        }
+        User user = userMapper.selectByUsername(username);
+        if (user == null) {
+            return null;
+        }
+        //BCrypt 比对（数据库规范禁止 MD5）
+        if (!PasswordUtil.matches(password, user.getPassword())) {
+            return null;
+        }
+        //响应不回传密码
+        user.setPassword(null);
+        return user;
+    }
 }

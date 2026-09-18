@@ -26,4 +26,7 @@ public interface UserService {
 
     //5.分页多条件查询用户信息(根据用户名/昵称模糊查询)
     PageInfo<User> getUserPage(int pageNum, int pageSize, String username, String nickname);
+
+    //6.登录(BCrypt matches 校验；成功返回用户信息且 password 置空，失败返回 null)
+    User login(String username, String password);
 }

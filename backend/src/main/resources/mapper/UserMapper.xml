@@ -49,5 +49,12 @@
         ORDER BY id ASC
     </select>
 
+    <!--  6.按用户名精确查询（登录用；password 供 BCrypt matches 比对）  -->
+    <select id="selectByUsername" resultType="User">
+        select id, username, password, nickname, avatar, register_time, updated_at
+        from user
+        where username = #{username}
+    </select>
+
 
 </mapper>
