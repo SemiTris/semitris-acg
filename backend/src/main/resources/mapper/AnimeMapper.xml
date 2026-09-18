@@ -2,5 +2,66 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.semitris.acg.mapper.AnimeMapper">
+    <!--  1.新增番剧（id 自增、时间列走数据库默认值，均不手工写入；rating 为冗余字段）  -->
+    <insert id="insertAnime" parameterType="Anime" useGeneratedKeys="true" keyProperty="id">
+        insert into anime (title, original_title, cover, type, genre, episodes, status, year, rating, synopsis)
+        values (#{title}, #{originalTitle}, #{cover}, #{type}, #{genre}, #{episodes}, #{status}, #{year}, #{rating}, #{synopsis})
+    </insert>
 
+    <!--  2.根据id删除番剧（子表 collection/review/recommend 由外键 ON DELETE CASCADE 级联清理）  -->
+    <delete id="deleteAnimeById">
+        delete
+        from anime
+        where id = #{id}
+    </delete>
+
+    <!--  3.根据id更新番剧（动态更新，只改非空字段；updated_at 交给数据库 ON UPDATE 自动刷）  -->
+    <update id="updateAnime">
+        update anime
+        <set>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="originalTitle != null">original_title = #{originalTitle},</if>
+            <if test="cover != null">cover = #{cover},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="genre != null">genre = #{genre},</if>
+            <if test="episodes != null">episodes = #{episodes},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="year != null">year = #{year},</if>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="synopsis != null">synopsis = #{synopsis},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--  4.根据id查询番剧（返回全部字段）  -->
+    <select id="selectAnimeById" resultType="Anime">
+        select id, title, original_title, cover, type, genre, episodes, status, year, rating, synopsis, created_at, updated_at
+        from anime
+        where id = #{id}
+    </select>
+
+    <!--  5.多条件查询番剧（title 模糊 / type 等值 / status 等值，条件全空 = 全量）  -->
+    <select id="selectAnimeByCondition" resultType="Anime">
+        select id, title, original_title, cover, type, genre, episodes, status, year, rating, synopsis, created_at, updated_at
+        from anime
+        <where>
+            <if test="title != null and title != ''">
+                AND title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <!--  6.全量列表（下拉框用，按 id 倒序）  -->
+    <select id="listAllAnime" resultType="Anime">
+        select id, title, original_title, cover, type, genre, episodes, status, year, rating, synopsis, created_at, updated_at
+        from anime
+        ORDER BY id DESC
+    </select>
 </mapper>
