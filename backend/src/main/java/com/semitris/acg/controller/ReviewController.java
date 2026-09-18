@@ -1,5 +1,6 @@
 package com.semitris.acg.controller;
 
+import com.github.pagehelper.PageInfo;
 import com.semitris.acg.entity.Review;
 import com.semitris.acg.service.ReviewService;
 import com.semitris.acg.util.R;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -74,5 +76,21 @@ public class ReviewController {
     @GetMapping("/listByAnime/{animeId}")
     public R<List<Review>> listByAnime(@PathVariable("animeId") Long animeId) {
         return R.success(reviewService.listByAnime(animeId));
+    }
+
+    /**
+     * 分页查询评价列表（连表番剧 title/cover，animeId 可选过滤）
+     *
+     * @param pageNum  页码，默认1
+     * @param pageSize 每页条数，默认5
+     * @param animeId  番剧id（可选，仅返回该番评价）
+     * @return 统一响应结果（携带分页信息 PageInfo）
+     */
+    @GetMapping("/page")
+    public R<PageInfo<Review>> pageReview(
+            @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+            @RequestParam(value = "animeId", required = false) Long animeId) {
+        return R.success(reviewService.pageReview(pageNum, pageSize, animeId));
     }
 }

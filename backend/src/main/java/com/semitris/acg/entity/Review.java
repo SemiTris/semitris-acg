@@ -26,6 +26,9 @@ public class Review {
     private LocalDateTime createdAt;//评价时间
     private LocalDateTime updatedAt;//修改时间
 
+    private String title;           //番剧标题（连表非持久化字段，不入库）
+    private String cover;           //番剧封面URL（连表非持久化字段，不入库）
+
 }
 
 

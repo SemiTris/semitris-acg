@@ -1,5 +1,7 @@
 package com.semitris.acg.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.semitris.acg.entity.Review;
 import com.semitris.acg.mapper.AnimeMapper;
 import com.semitris.acg.mapper.ReviewMapper;
@@ -119,5 +121,20 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<Review> listByAnime(Long animeId) {
         return reviewMapper.selectByAnimeId(animeId);
+    }
+
+    /**
+     * 分页查询评价列表（连表番剧 title/cover，animeId 可选过滤）
+     *
+     * @param pageNum  页码（从1开始）
+     * @param pageSize 每页条数
+     * @param animeId  番剧id（可选，仅返回该番评价）
+     * @return 分页结果 PageInfo
+     */
+    @Override
+    public PageInfo<Review> pageReview(int pageNum, int pageSize, Long animeId) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<Review> reviews = reviewMapper.listByPage(animeId);
+        return new PageInfo<>(reviews);
     }
 }

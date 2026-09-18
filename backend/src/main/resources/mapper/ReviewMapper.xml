@@ -39,4 +39,19 @@
         from review
         where id = #{id}
     </select>
+
+    <!--  6.分页查询评价列表（连表番剧 title/cover，animeId 可选过滤，按 id 倒序，分页由 PageHelper 完成）  -->
+    <select id="listByPage" resultType="Review">
+        select r.id, r.user_id, r.anime_id, r.rating, r.content,
+               r.created_at, r.updated_at,
+               a.title, a.cover
+        from review r
+                 left join anime a on r.anime_id = a.id
+        <where>
+            <if test="animeId != null">
+                r.anime_id = #{animeId}
+            </if>
+        </where>
+        order by r.id desc
+    </select>
 </mapper>

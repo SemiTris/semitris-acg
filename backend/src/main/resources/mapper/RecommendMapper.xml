@@ -2,5 +2,36 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.semitris.acg.mapper.RecommendMapper">
+    <!--  1.新增推荐（id 自增、时间列走数据库默认值；user_id 由 Service 强制填充；title/cover 连表字段不写入）  -->
+    <insert id="insertRecommend" parameterType="Recommend" useGeneratedKeys="true" keyProperty="id">
+        insert into recommend (user_id, anime_id, reason, tags)
+        values (#{userId}, #{animeId}, #{reason}, #{tags})
+    </insert>
 
+    <!--  2.根据id删除推荐  -->
+    <delete id="deleteRecommendById">
+        delete
+        from recommend
+        where id = #{id}
+    </delete>
+
+    <!--  3.根据id更新推荐（动态更新，只改非空字段 reason/tags；anime_id/user_id 不可变更；updated_at 交给数据库自动刷）  -->
+    <update id="updateRecommend">
+        update recommend
+        <set>
+            <if test="reason != null">reason = #{reason},</if>
+            <if test="tags != null">tags = #{tags},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--  4.安利墙全量列表（连表番剧 title/cover，按 id 倒序）  -->
+    <select id="listRecommend" resultType="Recommend">
+        select r.id, r.user_id, r.anime_id, r.reason, r.tags,
+               r.created_at, r.updated_at,
+               a.title, a.cover
+        from recommend r
+                 left join anime a on r.anime_id = a.id
+        order by r.id desc
+    </select>
 </mapper>

@@ -2,6 +2,7 @@ package com.semitris.acg.mapper;
 
 import com.semitris.acg.entity.Review;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -22,4 +23,7 @@ public interface ReviewMapper {
 
     //5.根据id查询评价(取原 anime_id 用于重算用)
     Review selectById(Long id);
+
+    //6.分页查询评价列表(连表番剧 title/cover，可选项 animeId 过滤，按 id 倒序，分页由 PageHelper 完成)
+    List<Review> listByPage(@Param("animeId") Long animeId);
 }
