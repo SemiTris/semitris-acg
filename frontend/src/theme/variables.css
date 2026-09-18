@@ -1,0 +1,22 @@
+/* ============================================================
+   SemiTris-ACG 二次元暗色主题 —— 品牌色板
+   背景 #1a1a2e · 主粉 #ff9ac1 · 辅紫 #a29bfe · 文字 #e6e6ef
+   ============================================================ */
+:root {
+  /* 品牌色板（docs/00-项目定义/00-命名与品牌.md） */
+  --bg-primary: #1a1a2e;        /* 页面深底 */
+  --bg-secondary: #23253a;      /* 次级背景 */
+  --bg-card: #26283f;           /* 卡片底 */
+  --primary: #ff9ac1;           /* 主粉 */
+  --secondary: #a29bfe;         /* 辅紫 */
+  --gradient-brand: linear-gradient(135deg, #ff9ac1, #a29bfe);
+
+  /* 文字 */
+  --text-primary: #e6e6ef;
+  --text-secondary: #9a9bb0;
+
+  /* 圆角与阴影 */
+  --radius: 12px;
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 10px 28px rgba(162, 155, 254, 0.28);
+}

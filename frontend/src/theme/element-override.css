@@ -1,0 +1,46 @@
+/* ============================================================
+   Element Plus 深色覆盖（二次元暗色主题，配合 dark class）
+   ============================================================ */
+html,
+body,
+#app {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+body {
+  margin: 0;
+}
+
+/* 通用卡片容器：暗底圆角，hover 上浮 + 粉紫微渐变 */
+.el-card.anime-card {
+  background: var(--bg-card);
+  border: none;
+  border-radius: var(--radius);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.el-card.anime-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-card-hover);
+  background: linear-gradient(145deg, #2a2c4a 0%, var(--bg-card) 100%);
+}
+
+/* Element Plus 组件深色微调 */
+.el-button--primary {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background: var(--secondary);
+  border-color: var(--secondary);
+}
+.el-pagination {
+  --el-pagination-bg-color: var(--bg-card);
+  --el-pagination-text-color: var(--text-primary);
+}
+/* 输入类控件深色统一 */
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner {
+  background-color: var(--bg-secondary);
+}
