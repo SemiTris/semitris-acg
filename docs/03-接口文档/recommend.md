@@ -39,7 +39,7 @@
       "id": 1,
       "animeId": 2,
       "title": "某某番",
-      "cover": "http://localhost:8080/file/download/xxx.jpg",
+      "cover": "https://semitris-acg.oss-cn-hangzhou.aliyuncs.com/cover/xxx.jpg",
       "reason": "三集定律都撑不住",
       "tags": "神作,悬疑,2025",
       "createdAt": "2026-08-27 12:00:00"

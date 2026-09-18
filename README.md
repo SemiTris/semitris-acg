@@ -58,7 +58,7 @@ semitris-acg/
 - 所有接口统一返回 `R<T>`：`{ code: 200/500, message, data }`
 - 分页统一用 PageHelper，参数 `pageNum` / `pageSize`，返回 `PageInfo`
 - 前后端分离，后端默认 `8080` 端口，CORS 全开
-- 封面/头像上传到 `D:/upload/`，访问路径由 `/file/upload`、`/file/download` 提供
+- 封面/头像上传至**阿里云 OSS**（`/file/upload` 返回直链 URL），密钥配置见 `application.example.yaml` 模板
 - 数据库字段 snake_case，代码字段 camelCase（`map-underscore-to-camel-case: true`）
 
 ## AI 协作（OpenCode + Claude Code）

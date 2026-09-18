@@ -31,7 +31,7 @@
 {
   "title": "葬送的芙莉莲",
   "originalTitle": "葬送のフリーレン",
-  "cover": "http://localhost:8080/file/download/1690000000000.jpg",
+  "cover": "https://semitris-acg.oss-cn-hangzhou.aliyuncs.com/cover/1690000000000.jpg",
   "type": 1,
   "genre": "奇幻,治愈,冒险",
   "episodes": 28,

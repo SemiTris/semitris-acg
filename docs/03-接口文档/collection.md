@@ -44,7 +44,7 @@
       "id": 1,
       "animeId": 1,
       "title": "葬送的芙莉莲",
-      "cover": "http://localhost:8080/file/download/1690000000000.jpg",
+      "cover": "https://semitris-acg.oss-cn-hangzhou.aliyuncs.com/cover/1690000000000.jpg",
       "listType": 2,
       "progress": 12,
       "favorite": 1,

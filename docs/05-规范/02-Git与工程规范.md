@@ -30,9 +30,8 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# 本地文件存储（不提交）
-upload/
-D:/upload/
+# 云存储密钥（不提交）
+**/application.yaml
 ```
 
 ## 3. 提交信息格式（约定式提交）

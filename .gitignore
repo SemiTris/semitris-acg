@@ -24,4 +24,7 @@ Thumbs.db
 # 本地文件存储（运行时生成，不纳入版本库）
 upload/
 
+# 临时参考工程（不入库；后端密钥配置由 backend/.gitignore 管理）
+complete-Project/
+
 # 后端构建产物由 backend/.gitignore 单独管理（target/ 等）
