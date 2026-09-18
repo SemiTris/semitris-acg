@@ -32,11 +32,11 @@ semitris-acg/
 ├── AGENTS.md            # 本文件
 ├── README.md / LICENSE
 ├── .gitignore
-├── docs/                # 全部文档
-│   ├── 00-项目定义/ ~ 05-规范/    # 原六类文档
-│   ├── 设计可视化/
-│   ├── adr/             # 架构决策记录（NNNN-标题.md）
-│   └── agent/           # 设计包（<功能>/00-需求 ~ 06-变更记录）
+├── docs/                # 全部文档（分层规范见 docs/05-规范/04-文档目录规范.md）
+│   ├── 00-项目定义/ ~ 05-规范/    # 定义/需求/设计/契约/计划/规范
+│   ├── 06-记录/         # adr/ 决策记录（NNNN-标题.md）+ 历史/ 废弃归档
+│   ├── 07-协作/         # 设计包（<功能>/00-需求 ~ 06-变更记录）
+│   └── assets/          # 非 Markdown 资产（HTML/图片等）
 ├── database/            # 数据库脚本（唯一入口 database/init.sql）
 ├── backend/             # Spring Boot 后端（com.semitris.acg）
 │   └── src/main/java/com/semitris/acg/{controller,service,impl,mapper,entity,util}

@@ -19,11 +19,11 @@
 
 ```
 semitris-acg/
-├── docs/                # 全部文档
-│   ├── 00-项目定义/ ~ 05-规范/    # 需求/设计/计划/规范
-│   ├── 设计可视化/
-│   ├── adr/             # 架构决策记录
-│   └── agent/           # AI 协作设计包
+├── docs/                # 全部文档（导航入口 docs/README.md）
+│   ├── 00-项目定义/ ~ 05-规范/    # 定义/需求/设计/契约/计划/规范
+│   ├── 06-记录/         # adr/ 决策 + 历史/ 废弃归档
+│   ├── 07-协作/         # AI 设计包
+│   └── assets/          # 非 Markdown 资产
 ├── database/            # 数据库脚本（唯一入口 init.sql）
 ├── backend/             # Spring Boot 后端
 └── frontend/            # Vue 前端（semitris-acg-web，待建）
@@ -33,14 +33,15 @@ semitris-acg/
 
 | 目录 | 说明 |
 |---|---|
+| [docs 导航](docs/README.md) | 文档唯一导航入口 |
 | [00-项目定义](docs/00-项目定义/00-命名与品牌.md) | 命名与品牌、项目范围 |
 | [01-需求](docs/01-需求/PRD.md) | PRD、用户故事与验收标准 |
 | [02-技术设计](docs/02-技术设计/01-架构设计.md) | 架构、数据库、接口规范 |
 | [03-接口文档](docs/03-接口文档/anime.md) | 六大模块接口明细 |
 | [04-计划](docs/04-计划/01-项目计划书.md) | 计划书、学习同步对照表 |
-| [05-规范](docs/05-规范/01-编码规范.md) | 编码、Git、素材规范 |
-| [adr](docs/adr/) | 架构决策记录 |
-| [agent](docs/agent/) | AI 协作设计包 |
+| [05-规范](docs/05-规范/01-编码规范.md) | 编码、Git、素材、文档目录规范 |
+| [06-记录](docs/06-记录/adr/) | ADR 决策记录 + 历史归档 |
+| [07-协作](docs/07-协作/) | AI 协作设计包 |
 
 ## 快速导航
 
@@ -64,7 +65,7 @@ semitris-acg/
 ## AI 协作（OpenCode + Claude Code）
 
 - 协作契约见 [AGENTS.md](AGENTS.md)：OpenCode 设计/评审，Claude Code 实现，人类（SemiTris）最终决策。
-- 设计落盘：`docs/agent/<功能>/00-需求 ~ 06-变更记录`；关键决策记 `docs/adr/NNNN-标题.md`。
+- 设计落盘：`docs/07-协作/<功能>/00-需求 ~ 06-变更记录`；关键决策记 `docs/06-记录/adr/NNNN-标题.md`。
 - 流程：设计包 → 人类确认 → 实现 → 回报 → 评审 → 验收。
 
 ## 说明
