@@ -21,7 +21,7 @@ body {
 .el-card.anime-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-card-hover);
-  background: linear-gradient(145deg, #2a2c4a 0%, var(--bg-card) 100%);
+  background: linear-gradient(145deg, #272a45 0%, var(--bg-card) 100%);
 }
 
 /* Element Plus 组件深色微调 */

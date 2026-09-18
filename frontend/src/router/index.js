@@ -4,6 +4,7 @@ import AnimeWall from '@/views/anime/AnimeWall.vue'
 import AnimeDetail from '@/views/anime/AnimeDetail.vue'
 import CollectionList from '@/views/collection/CollectionList.vue'
 import RecommendWall from '@/views/recommend/RecommendWall.vue'
+import Login from '@/views/user/Login.vue'
 import PlaceholderPage from '@/views/PlaceholderPage.vue'
 
 // 5 条路由：番剧库/详情/追番/安利墙完整实现；登录后置（占位）
@@ -17,7 +18,7 @@ const routes = [
       { path: 'anime/:id', name: 'animeDetail', component: AnimeDetail },
       { path: 'collection', name: 'collection', component: CollectionList },
       { path: 'recommend', name: 'recommend', component: RecommendWall },
-      { path: 'login', name: 'login', component: PlaceholderPage }
+      { path: 'login', name: 'login', component: Login }
     ]
   }
 ]
