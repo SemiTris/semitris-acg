@@ -2,15 +2,9 @@
 
 ## 1. 初始化
 
-在项目根目录（`E:\semitris-acg\...` 的实际后端工程目录）执行：
+项目已初始化为 git 仓库（根目录），**无需重复 `git init`**。根级 `.gitignore` 已就位（由 OpenCode 维护），后端目录另有 `backend/.gitignore`。
 
-```bash
-git init
-```
-
-建好 `.gitignore` 后完成首次提交。
-
-## 2. .gitignore 建议
+## 2. .gitignore（根级，已落地）
 
 ```gitignore
 # Java
