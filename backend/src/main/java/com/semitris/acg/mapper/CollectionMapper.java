@@ -25,4 +25,7 @@ public interface CollectionMapper {
     //5.按用户查询收藏列表(连表返回 title/cover，listType 可选过滤，按 id 倒序)
     List<Collection> listByUser(@Param("userId") Long userId,
                                 @Param("listType") Integer listType);
+
+    //6.根据id查询收藏原记录(取原 anime_id 等字段，供 editCollection 校验 progress 上限用)
+    Collection selectCollectionById(Long id);
 }

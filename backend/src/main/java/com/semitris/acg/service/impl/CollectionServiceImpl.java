@@ -77,7 +77,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     /**
      * 修改收藏
-     * <p>只更新非空字段；listType 1~5、favorite 0/1 校验；progress 若携带 animeId 则校验不超 episodes（不超校验上限）；user_id/anime_id 不可变更</p>
+     * <p>只更新非空字段；listType 1~5、favorite 0/1 校验；progress 校验 0<=progress<=episodes（用请求体 animeId 优先，未携带则用原记录 anime_id）；user_id/anime_id 不可变更</p>
      *
      * @param collection 收藏实体（必须携带id）
      * @return 是否修改成功
@@ -102,11 +102,21 @@ public class CollectionServiceImpl implements CollectionService {
                 && collection.getFavorite() != 0 && collection.getFavorite() != 1) {
             return false;
         }
-        //progress 校验上限：仅当携带 animeId 时严格校验（确保不超 episodes；不带 animeId 时前端通常自有管理，不激进拒绝）
-        if (collection.getProgress() != null
-                && collection.getAnimeId() != null
-                && !validProgress(collection.getAnimeId(), collection.getProgress())) {
-            return false;
+        //progress 校验上限：非空时需 0<=progress<=episodes；优先用请求体 animeId，未携带则查原记录的原 anime_id，拿不到（原记录不存在）拒绝
+        if (collection.getProgress() != null) {
+            Long animeId = collection.getAnimeId();
+            if (animeId == null) {
+                //请求体未携带 anime_id：用原收藏记录的原 anime_id 校验
+                Collection old = collectionMapper.selectCollectionById(collection.getId());
+                if (old == null) {
+                    //原收藏不存在，无法取番归属，拒绝（该 id 本就不应更新）
+                    return false;
+                }
+                animeId = old.getAnimeId();
+            }
+            if (!validProgress(animeId, collection.getProgress())) {
+                return false;
+            }
         }
         //userId 后端强制填充（update 不写 user_id，语义保持一致）
         collection.setUserId(DEFAULT_USER_ID);

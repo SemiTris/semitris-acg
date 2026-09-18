@@ -52,4 +52,11 @@
         </where>
         order by c.id desc
     </select>
+
+    <!--  6.根据id查询收藏原记录（取原 anime_id 等字段，供 editCollection 校验 progress 上限用）  -->
+    <select id="selectCollectionById" resultType="com.semitris.acg.entity.Collection">
+        select id, user_id, anime_id, list_type, progress, favorite, created_at, updated_at
+        from collection
+        where id = #{id}
+    </select>
 </mapper>
