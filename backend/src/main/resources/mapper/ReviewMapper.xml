@@ -2,5 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.semitris.acg.mapper.ReviewMapper">
+    <!--  1.新增评价（id 自增、时间列走数据库默认值；user_id 由 Service 强制填充）  -->
+    <insert id="insertReview" parameterType="Review" useGeneratedKeys="true" keyProperty="id">
+        insert into review (user_id, anime_id, rating, content)
+        values (#{userId}, #{animeId}, #{rating}, #{content})
+    </insert>
 
+    <!--  2.根据id更新评价（动态更新，只改非空字段 rating/content；anime_id 不更新；updated_at 交给数据库自动刷）  -->
+    <update id="updateReview">
+        update review
+        <set>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="content != null">content = #{content},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--  3.根据id删除评价  -->
+    <delete id="deleteReviewById">
+        delete
+        from review
+        where id = #{id}
+    </delete>
+
+    <!--  4.按番查询评价列表（按 id 倒序）  -->
+    <select id="selectByAnimeId" resultType="Review">
+        select id, user_id, anime_id, rating, content, created_at, updated_at
+        from review
+        where anime_id = #{animeId}
+        order by id desc
+    </select>
+
+    <!--  5.根据id查询评价（供 update/delete 取原 anime_id 重算 rating 用）  -->
+    <select id="selectById" resultType="Review">
+        select id, user_id, anime_id, rating, content, created_at, updated_at
+        from review
+        where id = #{id}
+    </select>
 </mapper>

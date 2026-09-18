@@ -64,4 +64,11 @@
         from anime
         ORDER BY id DESC
     </select>
+
+    <!--  7.重算番剧平均评分（review 增/改/删后由 ReviewService 同一事务调用；该番无评价时 AVG 为 NULL，rating 置 NULL）  -->
+    <update id="updateAnimeRating">
+        update anime
+        set rating = (select avg(rating) from review where anime_id = #{animeId})
+        where id = #{animeId}
+    </update>
 </mapper>

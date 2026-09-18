@@ -2,5 +2,54 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.semitris.acg.mapper.CollectionMapper">
+    <!--  1.新增收藏（id 自增、时间列走数据库默认值；user_id 由 Service 强制填充；title/cover 连表字段不写入）  -->
+    <insert id="insertCollection" parameterType="com.semitris.acg.entity.Collection" useGeneratedKeys="true" keyProperty="id">
+        insert into collection (user_id, anime_id, list_type, progress, favorite)
+        values (#{userId}, #{animeId}, #{listType}, #{progress}, #{favorite})
+    </insert>
 
+    <!--  2.根据id删除收藏  -->
+    <delete id="deleteCollectionById">
+        delete
+        from collection
+        where id = #{id}
+    </delete>
+
+    <!--  3.根据id更新收藏（动态更新，只改非空字段；user_id/anime_id 不可变更；updated_at 交给数据库 ON UPDATE 自动刷）  -->
+    <update id="updateCollection">
+        update collection
+        <set>
+            <if test="listType != null">list_type = #{listType},</if>
+            <if test="progress != null">progress = #{progress},</if>
+            <if test="favorite != null">favorite = #{favorite},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--  4.按番+按用户查询收藏（连表取番剧 title/cover；判重与详情页收藏状态用）  -->
+    <select id="selectByAnimeAndUser" resultType="com.semitris.acg.entity.Collection">
+        select c.id, c.user_id, c.anime_id, c.list_type, c.progress, c.favorite,
+               c.created_at, c.updated_at,
+               a.title, a.cover
+        from collection c
+                 left join anime a on c.anime_id = a.id
+        where c.anime_id = #{animeId}
+          and c.user_id = #{userId}
+    </select>
+
+    <!--  5.按用户查询收藏列表（连表取 title/cover，listType 可选过滤，按 id 倒序）  -->
+    <select id="listByUser" resultType="com.semitris.acg.entity.Collection">
+        select c.id, c.user_id, c.anime_id, c.list_type, c.progress, c.favorite,
+               c.created_at, c.updated_at,
+               a.title, a.cover
+        from collection c
+                 left join anime a on c.anime_id = a.id
+        <where>
+            c.user_id = #{userId}
+            <if test="listType != null">
+                and c.list_type = #{listType}
+            </if>
+        </where>
+        order by c.id desc
+    </select>
 </mapper>

@@ -28,4 +28,7 @@ public interface AnimeMapper {
 
     //6.全量列表(按id倒序)
     List<Anime> listAllAnime();
+
+    //7.重算番剧平均评分(review 增/改/删后由 ReviewService 同事务调用；无评价时置 NULL)
+    int updateAnimeRating(Long animeId);
 }
