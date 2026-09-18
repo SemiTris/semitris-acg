@@ -1,0 +1,38 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "architect",
+  "instructions": ["AGENTS.md", "docs/README.md"],
+  "agent": {
+    "architect": {
+      "description": "项目架构师（设计/评审）：出设计包、定接口契约、拆任务、评审验收，不写大批量业务代码、不做日常提交。",
+      "mode": "primary",
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "git commit*": "ask",
+          "git push*": "ask",
+          "git pull*": "ask",
+          "* --force*": "deny",
+          "rm -rf*": "ask",
+          "drop database*": "deny",
+          "mysql -e *": "deny",
+          "*": "allow"
+        }
+      }
+    }
+  },
+  "permission": {
+    "bash": {
+      "git commit*": "ask",
+      "git push*": "ask",
+      "git pull*": "ask",
+      "* --force*": "deny",
+      "rm -rf*": "ask",
+      "drop database*": "deny",
+      "*": "allow"
+    },
+    "external_directory": {
+      "*": "deny"
+    }
+  }
+}
