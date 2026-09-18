@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/layout/MainLayout.vue'
 import AnimeWall from '@/views/anime/AnimeWall.vue'
+import AnimeDetail from '@/views/anime/AnimeDetail.vue'
+import CollectionList from '@/views/collection/CollectionList.vue'
+import RecommendWall from '@/views/recommend/RecommendWall.vue'
 import PlaceholderPage from '@/views/PlaceholderPage.vue'
 
-// 5 条路由（批次 A 满足可导航）；本期仅 /anime 为完整页，
-// 详情/追番/安利墙/登录 注册但指向占位页（批次 C 后置实现）。
+// 5 条路由：番剧库/详情/追番/安利墙完整实现；登录后置（占位）
 const routes = [
   {
     path: '/',
@@ -12,9 +14,9 @@ const routes = [
     redirect: '/anime',
     children: [
       { path: 'anime', name: 'anime', component: AnimeWall },
-      { path: 'anime/:id', name: 'animeDetail', component: PlaceholderPage },
-      { path: 'collection', name: 'collection', component: PlaceholderPage },
-      { path: 'recommend', name: 'recommend', component: PlaceholderPage },
+      { path: 'anime/:id', name: 'animeDetail', component: AnimeDetail },
+      { path: 'collection', name: 'collection', component: CollectionList },
+      { path: 'recommend', name: 'recommend', component: RecommendWall },
       { path: 'login', name: 'login', component: PlaceholderPage }
     ]
   }
