@@ -1,5 +1,6 @@
 package com.semitris.acg.service;
 
+import com.github.pagehelper.PageInfo;
 import com.semitris.acg.entity.Review;
 
 import java.util.List;
@@ -24,4 +25,7 @@ public interface ReviewService {
 
     //4.按番查询评价列表(按 id 倒序)
     List<Review> listByAnime(Long animeId);
+
+    //5.分页查询评价列表(连表番剧 title/cover，animeId 可选过滤，按 id 倒序)
+    PageInfo<Review> pageReview(int pageNum, int pageSize, Long animeId);
 }
