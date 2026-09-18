@@ -13,7 +13,7 @@
 | 后端 package | com.semitris.acg |
 | 数据库 | semitris_acg（MySQL 8.x, utf8mb4） |
 | 前端工程 | semitris-acg-web |
-| 技术栈 | Spring Boot 3.5 + MyBatis(XML) + PageHelper + MySQL + Vue（跟随老师） |
+| 技术栈 | Spring Boot 3.5.16 + Java 17 + MyBatis(XML) + PageHelper + MySQL 8 + Vue 3 + Element Plus + Vite（权威见 [docs/02-技术设计/00-技术选型.md](docs/02-技术设计/00-技术选型.md)） |
 
 ## 目录结构
 

@@ -45,6 +45,8 @@ semitris-acg/
 
 ## 5. 关键技术契约（后端，详见 docs/02-技术设计/ 与 docs/03-接口文档/）
 
+- **技术栈权威**：`docs/02-技术设计/00-技术选型.md` —— Java 17 / Spring Boot 3.5.16 / MyBatis(XML) + PageHelper / MySQL 8 / Vue 3(Composition API) + Element Plus + Vite。
+
 - 统一响应 `R<T>`：`code=200` 成功 / `500` 失败，`message` + `data`。
 - 路径风格固定：`/add` `/delete/{id}` `/update` `/findById/{id}` `/page` `/list`。
 - 分页用 PageHelper：参数 `pageNum`（默认1）/ `pageSize`（默认5~10），返回 `PageInfo`。
